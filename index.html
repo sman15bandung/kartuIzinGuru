@@ -763,7 +763,7 @@
     <script>
         // ====== KONEKSI KE GOOGLE SHEETS (Apps Script Web App) ======
         const CONFIG = {
-            SCRIPT_URL: 'PASTE_URL_WEB_APP_APPS_SCRIPT_DI_SINI'
+            SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbw5XtbDDteKzyoL6LVM47ekDW3rTfQmrVNH72aJ7Y7gVlZM0uqJI7Pz8AcY_0kGA9hGag/exec'
         };
 
         async function loadDataFromServer() {
@@ -891,6 +891,21 @@
         let chartJenisInstance = null;
         let currentAnalyticsPeriod = 'all';
 
+        // ====== PROTEKSI PASSWORD ADMIN ======
+        const ADMIN_PASSWORD = 'admin15';
+        let adminUnlocked = false;
+
+        function checkAdminPassword(aksiLabel) {
+            const pwd = prompt('Masukkan password admin untuk ' + aksiLabel + ':');
+            if (pwd === null) return false; // batal
+            if (pwd !== ADMIN_PASSWORD) {
+                showToast('Password admin salah!');
+                return false;
+            }
+            return true;
+        }
+        // ====== AKHIR PROTEKSI PASSWORD ADMIN ======
+
         // Initialize Canvas Signature & Data
         window.addEventListener('load', async () => {
             initSignaturePad();
@@ -921,6 +936,13 @@
         }
 
         function switchTab(tab) {
+            if (tab === 'admin' && !adminUnlocked) {
+                if (!checkAdminPassword('mengakses Portal Admin')) {
+                    return;
+                }
+                adminUnlocked = true;
+            }
+
             const btnForm = document.getElementById('btnTabForm');
             const btnRekap = document.getElementById('btnTabRekap');
             const btnAnalytics = document.getElementById('btnTabAnalytics');
@@ -1399,6 +1421,8 @@
         }
 
         function deletePermit(id) {
+            if (!checkAdminPassword('menghapus data izin ini')) return;
+
             permitData = permitData.filter(i => i.id !== id);
             showToast('Data perizinan berhasil dihapus.');
             updateBadgeCount();
