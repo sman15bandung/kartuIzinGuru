@@ -779,7 +779,15 @@
                     durasi: Number(p.durasi) || 1,
                     kelasTerpilih: p.kelasTerpilih ? String(p.kelasTerpilih).split('||').filter(Boolean) : []
                 }));
-                jadwalGuruData = json.jadwalData || [];
+
+                if (json.jadwalData && json.jadwalData.length > 0) {
+                    // Sheet "Jadwal Mengajar" sudah ada isinya di spreadsheet, pakai itu
+                    jadwalGuruData = json.jadwalData;
+                } else {
+                    // Sheet masih kosong -> pakai daftar guru bawaan di kode ini,
+                    // lalu kirim sekali ke spreadsheet supaya tersimpan permanen di sana.
+                    postToServer('addJadwalBatch', { data: jadwalGuruData });
+                }
             } catch (err) {
                 console.error('Gagal memuat data dari server:', err);
                 showToast('Gagal memuat data dari server, memakai data lokal.');
